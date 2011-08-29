@@ -4,7 +4,7 @@ import java.io.File;
 import java.util.Collections;
 import java.util.Set;
 
-import com.nadeem.app.util.OutputLogger;
+import com.nadeem.app.finder.util.OutputLogger;
 
 public class SearchEngine {
 

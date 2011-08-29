@@ -1,4 +1,4 @@
-package com.nadeem.app.util;
+package com.nadeem.app.finder.util;
 
 public interface OutputLogger {
 

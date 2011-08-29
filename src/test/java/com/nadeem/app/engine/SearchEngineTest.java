@@ -17,7 +17,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 
 import com.nadeem.app.finder.engine.SearchEngine;
-import com.nadeem.app.util.OutputLogger;
+import com.nadeem.app.finder.util.OutputLogger;
 
 public class SearchEngineTest {
 	
