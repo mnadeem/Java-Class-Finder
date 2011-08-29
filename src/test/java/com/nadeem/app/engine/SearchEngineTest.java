@@ -18,6 +18,7 @@ import org.mockito.Mock;
 
 import com.nadeem.app.finder.engine.SearchEngine;
 import com.nadeem.app.finder.util.OutputLogger;
+import com.nadeem.app.finder.util.ResultType;
 
 public class SearchEngineTest {
 	
@@ -62,7 +63,7 @@ public class SearchEngineTest {
 		
 		verify(mockedLogger).logResult(argumentCaptor.capture());
 		
-		assertEquals("Search Aborted !!!", argumentCaptor.getValue());
+		assertEquals(ResultType.ABORTED.toString(), argumentCaptor.getValue());
 	}
 	
 	@Test
@@ -73,6 +74,6 @@ public class SearchEngineTest {
 		
 		verify(mockedLogger).logResult(argumentCaptor.capture());
 		
-		assertEquals("Invalid Path : " + SOME_PATH, argumentCaptor.getValue());
+		assertEquals(ResultType.INVALID.buildMessage(SOME_PATH), argumentCaptor.getValue());
 	}
 }
