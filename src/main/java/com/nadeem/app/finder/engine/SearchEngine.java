@@ -48,7 +48,7 @@ public class SearchEngine {
 		}
 		for (File currentFile : allFiles) {
 			if (isArchiveFile(currentFile)) {
-				doSearchInArchive(currentFile, className);
+				recursivelySearchInArchiveFile(currentFile, className);
 			} else {
 				doSearchInFileSystem(currentFile, className);
 			}
@@ -61,7 +61,7 @@ public class SearchEngine {
 		
 	}
 
-	private void doSearchInArchive(File archiveFile, String className) {
+	private void recursivelySearchInArchiveFile(File archiveFile, String className) {
 		// TODO Auto-generated method stub
 		
 	}
