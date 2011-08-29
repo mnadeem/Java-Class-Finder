@@ -1,7 +1,6 @@
 package com.nadeem.app.finder.engine;
 
 import java.io.File;
-import java.util.Collections;
 import java.util.Set;
 
 import com.nadeem.app.finder.util.OutputLogger;
@@ -17,30 +16,28 @@ public class SearchEngine {
 	}
 	
 	public void searchForClass(String path, String className) {
-		this.searchForClass(Collections.singleton(path), className);
-	}
-	
-	public void searchForClass(Set<String> paths, String className) {
-		for (String path : paths) {
-			
-			if (abortSearch) {
-				outputLogger.logResult(ResultType.ABORTED.toString());
-				return; 
-			}
-			searchClassInPath(path, className);			
-		}	
-	}
-
-	private void searchClassInPath(String path, String className) {		
+		
 		File searchPath = searchPath(path);
 		if (searchPath.exists()) {
-			doSearchForClass(searchPath, className);
+			doSearchForClassInDirectory(searchPath, className);
 		} else {
 			outputLogger.logResult(ResultType.INVALID.buildMessage(path));
 		}
 	}
+	
+	public void searchForClass(Set<String> paths, String className) {
+		for (String path : paths) {
+			searchForClass(path, className);			
+		}	
+	}
 
-	private void doSearchForClass(File searchPath, String className) {
+	private void doSearchForClassInDirectory(File searchPath, String className) {
+		
+		if (abortSearch) {
+			outputLogger.logResult(ResultType.ABORTED.toString());
+			return; 
+		}
+
 		File[] allFiles = searchPath.listFiles();
 		if (allFiles == null || allFiles.length == 0) {
 			outputLogger.logResult(ResultType.INVALID.toString());
@@ -49,6 +46,8 @@ public class SearchEngine {
 		for (File currentFile : allFiles) {
 			if (isArchiveFile(currentFile)) {
 				recursivelySearchInArchiveFile(currentFile, className);
+			} else if (currentFile.isDirectory()) {
+				doSearchForClassInDirectory(currentFile, className);
 			} else {
 				doSearchInFileSystem(currentFile, className);
 			}
@@ -56,13 +55,34 @@ public class SearchEngine {
 	}
 
 
-	private void doSearchInFileSystem(File fileSystem, String className) {
-		// TODO Auto-generated method stub
+	private void doSearchInFileSystem(File fileSystem, String className) {		
+		if (abortSearch) {
+			outputLogger.logResult(ResultType.ABORTED.toString());
+			return; 
+		}
 		
+	    if (getSimpleFileName(fileSystem).equalsIgnoreCase(className)) {
+	      this.outputLogger.logResult(ResultType.DIRECTORY.buildMessage(fileSystem.getAbsolutePath()));	     
+	    }		
+	}
+	
+	private String getSimpleFileName(File file) {
+		int dot = lastIndexOfDot(file);
+	    return file.getName().substring(0, dot);
+	}
+
+	private int lastIndexOfDot(File file) {
+		int dot = file.getName().lastIndexOf('.');
+		 dot = (dot == -1 ) ? file.getName().length() : dot;
+		return dot;
 	}
 
 	private void recursivelySearchInArchiveFile(File archiveFile, String className) {
-		// TODO Auto-generated method stub
+		if (abortSearch) {
+			outputLogger.logResult(ResultType.ABORTED.toString());
+			return; 
+		}
+		//TODO: ADD
 		
 	}
 

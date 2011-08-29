@@ -56,6 +56,7 @@ public class SearchEngineTest {
 	
 	@Test
 	public void shouldLogAbortedMessage() throws Exception {
+		when(mockedFile.exists()).thenReturn(Boolean.TRUE);
 		ArgumentCaptor<String> argumentCaptor = ArgumentCaptor.forClass(String.class);
 
 		targetBeingTested.abortSearch();
@@ -76,4 +77,5 @@ public class SearchEngineTest {
 		
 		assertEquals(ResultType.INVALID.buildMessage(SOME_PATH), argumentCaptor.getValue());
 	}
+
 }
