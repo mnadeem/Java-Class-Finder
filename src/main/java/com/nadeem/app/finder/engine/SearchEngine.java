@@ -27,7 +27,7 @@ public class SearchEngine {
 	
 	public void searchForClass(Set<String> paths, String className) {
 		for (String path : paths) {
-			searchForClass(path, className);			
+			searchForClass(path, className);
 		}	
 	}
 
