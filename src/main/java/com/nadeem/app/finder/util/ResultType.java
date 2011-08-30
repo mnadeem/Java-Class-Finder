@@ -11,7 +11,7 @@ public enum ResultType {
 	}
 	
 	public String buildMessage(String message) {
-		return name + " : " + message;
+		return name + " <> " + message;
 	}
 	
 	@Override

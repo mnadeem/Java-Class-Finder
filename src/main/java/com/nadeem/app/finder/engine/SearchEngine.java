@@ -9,7 +9,7 @@ import com.nadeem.app.finder.util.ResultType;
 public class SearchEngine {
 
 	private OutputLogger outputLogger;
-	private Boolean abortSearch = Boolean.FALSE;
+	private Boolean abortSearch 		= Boolean.FALSE;
 	
 	public SearchEngine(OutputLogger outputLogger) {
 		this.outputLogger = outputLogger;
