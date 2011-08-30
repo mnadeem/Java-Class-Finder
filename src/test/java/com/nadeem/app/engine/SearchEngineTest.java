@@ -77,19 +77,7 @@ public class SearchEngineTest {
 		verify(mockedLogger).logResult(argumentCaptor.capture());		
 		assertEquals(ResultType.INVALID.buildMessage(SOME_PATH), argumentCaptor.getValue());
 	}
-	
-	@Test
-	public void shouldLogAbortedMessageWhenNoFileExistsInTheLocation() throws Exception {
-		when(mockedFile.exists()).thenReturn(Boolean.TRUE);
-		ArgumentCaptor<String> argumentCaptor = ArgumentCaptor.forClass(String.class);
-		when(mockedFile.listFiles()).thenReturn(null);
 		
-		targetBeingTested.searchForClass(SOME_PATH, SOME_CLASS);
-		
-		verify(mockedLogger).logResult(argumentCaptor.capture());		
-		assertEquals(ResultType.INVALID.toString(), argumentCaptor.getValue());
-	}
-	
 	@Test
 	public void shouldLogToLoggerWhenClassFoundInTheDirectory () throws Exception {
 		when(mockedFile.exists()).thenReturn(Boolean.TRUE);

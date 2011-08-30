@@ -39,8 +39,7 @@ public class SearchEngine {
 		}
 
 		File[] allFiles = searchPath.listFiles();
-		if (allFiles == null || allFiles.length == 0) {
-			outputLogger.logResult(ResultType.INVALID.toString());
+		if (allFiles == null || allFiles.length == 0) {			
 			return ;
 		}
 		for (File currentFile : allFiles) {
