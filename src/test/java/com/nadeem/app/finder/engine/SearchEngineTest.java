@@ -49,7 +49,6 @@ public class SearchEngineTest {
 
 		targetBeingTested 	=  new MockedSearchEngine(mockedLogger);
 		paths	 			=  new HashSet<String>();
-
 	}
 
 	@Test
@@ -60,22 +59,7 @@ public class SearchEngineTest {
 
 		verify(mockedLogger, times(1)).logResult(anyString());
 	}
-
-	@Test
-	public void shouldLogAbortedMessage() throws Exception {
-		when(mockedFile.exists()).thenReturn(Boolean.TRUE);
-		when(mockedFile.isDirectory()).thenReturn(Boolean.TRUE);
-		when(mockedFile.getName()).thenReturn(SOME_PATH);
-		when(mockedFile.listFiles()).thenReturn(new File[] {new File(SOME_CLASS)});
-		ArgumentCaptor<String> argumentCaptor = ArgumentCaptor.forClass(String.class);
-		targetBeingTested.abortSearch();
-
-		targetBeingTested.searchForClass(SOME_PATH, SOME_CLASS);
-
-		verify(mockedLogger).logResult(argumentCaptor.capture());
-		assertEquals(ResultType.ABORTED.toString(), argumentCaptor.getValue());
-	}
-
+	
 	@Test
 	public void shouldLogInvalidFilePathMessage() throws Exception {
 		when(mockedFile.exists()).thenReturn(Boolean.FALSE);
@@ -92,14 +76,63 @@ public class SearchEngineTest {
 		when(mockedFile.exists()).thenReturn(Boolean.TRUE);
 		when(mockedFile.isDirectory()).thenReturn(Boolean.TRUE);
 		when(mockedFile.getName()).thenReturn(SOME_PATH);
-		ArgumentCaptor<String> argumentCaptor = ArgumentCaptor.forClass(String.class);
 		when(mockedFile.listFiles()).thenReturn(new File[] {new File(SOME_CLASS)});
 
 		targetBeingTested.searchForClass(SOME_PATH, SOME_CLASS);
 
+		ArgumentCaptor<String> argumentCaptor = ArgumentCaptor.forClass(String.class);
 		verify(mockedLogger).logResult(argumentCaptor.capture());
 		assertEquals(ResultType.DIRECTORY.buildMessage(SOME_CLASS + " Found in : " +new File(SOME_CLASS).getAbsolutePath()), argumentCaptor.getValue());
 	}
+	
+	@Test
+	public void shouldLogIfCurrectFileIsBeingSearched() throws Exception {
+		when(mockedFile.exists()).thenReturn(Boolean.TRUE);
+		when(mockedFile.isDirectory()).thenReturn(Boolean.FALSE);
+		when(mockedFile.getName()).thenReturn(SOME_CLASS);
+		when(mockedFile.getAbsolutePath()).thenReturn(new File(SOME_CLASS).getAbsolutePath());
+
+		targetBeingTested.searchForClass(SOME_PATH, SOME_CLASS);
+		
+		ArgumentCaptor<String> argumentCaptor = ArgumentCaptor.forClass(String.class);
+		verify(mockedLogger).logResult(argumentCaptor.capture());
+		assertEquals(ResultType.DIRECTORY.buildMessage(SOME_CLASS + " Found in : " + new File(SOME_CLASS).getAbsolutePath()), argumentCaptor.getValue());
+
+	}
+
+	@Test
+	public void shouldLogAbortedMessage() throws Exception {
+		when(mockedFile.exists()).thenReturn(Boolean.TRUE);
+		when(mockedFile.isDirectory()).thenReturn(Boolean.TRUE);
+		when(mockedFile.getName()).thenReturn(SOME_PATH);
+
+		when(mockedFile.listFiles()).thenReturn(new File[] {new File(SOME_CLASS)});
+		
+		targetBeingTested.abortSearch();
+
+		targetBeingTested.searchForClass(SOME_PATH, SOME_CLASS);
+
+		ArgumentCaptor<String> argumentCaptor = ArgumentCaptor.forClass(String.class);
+		verify(mockedLogger).logResult(argumentCaptor.capture());
+		assertEquals(ResultType.ABORTED.toString(), argumentCaptor.getValue());
+	}
+	
+	@Test
+	public void shouldSearchForFilesRecursivelly() throws Exception {
+		when(mockedFile.exists()).thenReturn(Boolean.TRUE);
+		when(mockedFile.isDirectory()).thenReturn(Boolean.TRUE);
+		when(mockedFile.getName()).thenReturn(SOME_PATH);
+
+		when(mockedFile.listFiles()).thenReturn(new File[] {nextFile});
+		when(nextFile.getName()).thenReturn(SOME_CLASS);
+		when(nextFile.isDirectory()).thenReturn(Boolean.TRUE);
+		when(nextFile.listFiles()).thenReturn(null);
+
+		targetBeingTested.searchForClass(SOME_PATH, SOME_CLASS);
+
+		verify(nextFile).isDirectory();
+	}
+	
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
@@ -107,6 +140,7 @@ public class SearchEngineTest {
 		when(mockedFile.exists()).thenReturn(Boolean.TRUE);
 		when(mockedFile.isDirectory()).thenReturn(Boolean.TRUE);
 		when(mockedFile.getName()).thenReturn(SOME_PATH);
+
 		when(mockedFile.listFiles()).thenReturn(new File[] {nextFile});
 		when(nextFile.getName()).thenReturn(ARCHIVE_FIE);
 		when(mockedZipFile.entries()).thenReturn(new EmptyEnumeration());
@@ -117,34 +151,8 @@ public class SearchEngineTest {
 
 	}
 
-	@Test
-	public void shouldSearchForFilesRecursivelly() throws Exception {
-		when(mockedFile.exists()).thenReturn(Boolean.TRUE);
-		when(mockedFile.getName()).thenReturn(SOME_PATH);
-		when(mockedFile.isDirectory()).thenReturn(Boolean.TRUE);
-		when(mockedFile.listFiles()).thenReturn(new File[] {nextFile});
-		when(nextFile.getName()).thenReturn(SOME_CLASS);
-		when(nextFile.isDirectory()).thenReturn(Boolean.TRUE);
-		when(nextFile.listFiles()).thenReturn(null);
-
-		targetBeingTested.searchForClass(SOME_PATH, SOME_CLASS);
-
-		verify(nextFile).isDirectory();
-
-	}
-
-	@Test
-	public void shouldLogIfCurrectFileIsBeingSearched() throws Exception {
-		when(mockedFile.exists()).thenReturn(Boolean.TRUE);
-		when(mockedFile.getName()).thenReturn(SOME_CLASS);
-		when(mockedFile.isDirectory()).thenReturn(Boolean.FALSE);
-		when(mockedFile.getAbsolutePath()).thenReturn(new File(SOME_CLASS).getAbsolutePath());
-		ArgumentCaptor<String> argumentCaptor = ArgumentCaptor.forClass(String.class);
-		targetBeingTested.searchForClass(SOME_PATH, SOME_CLASS);
-		verify(mockedLogger).logResult(argumentCaptor.capture());
-		assertEquals(ResultType.DIRECTORY.buildMessage(SOME_CLASS + " Found in : " + new File(SOME_CLASS).getAbsolutePath()), argumentCaptor.getValue());
-
-	}
+	
+	
 
 	private class MockedSearchEngine extends SearchEngine {
 
