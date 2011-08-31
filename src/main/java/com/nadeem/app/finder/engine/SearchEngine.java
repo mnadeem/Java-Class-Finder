@@ -14,9 +14,11 @@ import com.nadeem.app.finder.util.ResultType;
 import com.nadeem.app.finder.util.SearchAbortedException;
 
 public class SearchEngine {
+	
+	private static char FILE_SEPERATOR 	= System.getProperty("file.separator").toCharArray()[0];
 
-	private LogListener logListener;
 	private Boolean abortSearch 		= Boolean.FALSE;
+	private LogListener logListener;
 
 	public SearchEngine(LogListener outputLogger) {
 		this.logListener = outputLogger;
@@ -34,7 +36,7 @@ public class SearchEngine {
 		if (!searchPath.exists()) {
 			logListener.onLog(ResultType.INVALID.buildMessage(path));
 		} else if (FileType.isCompressedFile(searchPath.getName())) {
-			recursivelySearchInArchiveFile(searchPath, className);
+			nonRecursivelySearchInArchiveFile(searchPath, className);
 		} else if (searchPath.isDirectory()) {
 			recursivelySearchInDirectory(searchPath, className);
 		} else {
@@ -53,7 +55,7 @@ public class SearchEngine {
 			for (File currentFile : allFiles) {
 				throwExceptionIfAborted();
 				if (FileType.isCompressedFile(currentFile.getName())) {
-					recursivelySearchInArchiveFile(currentFile, className);
+					nonRecursivelySearchInArchiveFile(currentFile, className);
 				} else if (currentFile.isDirectory()) {
 					recursivelySearchInDirectory(currentFile, className);
 				} else {
@@ -90,7 +92,7 @@ public class SearchEngine {
 	}
 
 	private int lastIndexOfSlash(String zipEntryName) {
-		return zipEntryName.lastIndexOf('/');
+		return zipEntryName.lastIndexOf(FILE_SEPERATOR);
 	}
 
 	private int lastIndexOfDot(String fileName, int fromIndex) {
@@ -99,7 +101,7 @@ public class SearchEngine {
 		return dot;
 	}
 
-	private void recursivelySearchInArchiveFile(File currentFile, String className) {
+	private void nonRecursivelySearchInArchiveFile(File currentFile, String className) {
 
 		try {
 			ZipFile archiveFile = newZipFile(currentFile);
@@ -108,7 +110,7 @@ public class SearchEngine {
 
 				//TODO : Add support to read from a archive file which is inside a archive file.
 				
-				if (!zipEntry.getName().endsWith("/") && getSimpleZipFileName(zipEntry.getName()).equalsIgnoreCase(className)) {
+				if (!zipEntry.getName().endsWith(String.valueOf(FILE_SEPERATOR)) && getSimpleZipFileName(zipEntry.getName()).equalsIgnoreCase(className)) {
 				      this.logListener.onLog(ResultType.ARCHIVE.buildMessage(zipEntry.getName() + " Found in : " +  currentFile.getAbsolutePath()));
 				}
 				
