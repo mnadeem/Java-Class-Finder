@@ -3,6 +3,7 @@ package com.nadeem.app.finder.engine;
 import java.io.File;
 import java.util.Set;
 
+import com.nadeem.app.finder.util.FileType;
 import com.nadeem.app.finder.util.OutputLogger;
 import com.nadeem.app.finder.util.ResultType;
 
@@ -43,7 +44,7 @@ public class SearchEngine {
 			return ;
 		}
 		for (File currentFile : allFiles) {
-			if (isArchiveFile(currentFile)) {
+			if (FileType.isCompressedFile(currentFile.getName())) {
 				recursivelySearchInArchiveFile(currentFile, className);
 			} else if (currentFile.isDirectory()) {
 				doSearchForClassInDirectory(currentFile, className);
@@ -81,24 +82,7 @@ public class SearchEngine {
 			outputLogger.logResult(ResultType.ABORTED.toString());
 			return; 
 		}
-		//TODO: ADD
-		
-	}
-
-	private boolean isArchiveFile(File currentFile) {
-		return isZipFile(currentFile) || isJavaArchiveFile(currentFile);
-	}
-
-	private boolean isJavaArchiveFile(File currentFile) {
-		return isFileOfType(currentFile, ".war") || isFileOfType(currentFile, ".jar") || isFileOfType(currentFile, ".ear");
-	}
-
-	private boolean isZipFile(File currentFile) {
-		return isFileOfType(currentFile, ".zip");
-	}
-
-	private boolean isFileOfType(File currentFile, String extension) {
-		return currentFile.getName().toLowerCase().endsWith(extension);
+		//TODO: ADD		
 	}
 
 	protected File searchPath(String path) {
