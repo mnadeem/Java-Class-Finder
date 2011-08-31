@@ -20,8 +20,8 @@ public class SearchEngine {
 	private Boolean abortSearch 		= Boolean.FALSE;
 	private LogListener logListener;
 
-	public SearchEngine(LogListener outputLogger) {
-		this.logListener = outputLogger;
+	public SearchEngine(LogListener logListener) {
+		this.logListener = logListener;
 	}
 
 	public void searchForClass(Set<String> paths, String className) {
