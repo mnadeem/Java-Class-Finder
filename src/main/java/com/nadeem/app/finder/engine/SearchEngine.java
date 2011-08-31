@@ -22,6 +22,12 @@ public class SearchEngine {
 		this.outputLogger = outputLogger;
 	}
 
+	public void searchForClass(Set<String> paths, String className) {
+		for (String path : paths) {
+			searchForClass(path, className);
+		}
+	}
+
 	public void searchForClass(String path, String className) {
 
 		File searchPath = searchPath(path);
@@ -36,18 +42,13 @@ public class SearchEngine {
 		}
 	}
 
-	public void searchForClass(Set<String> paths, String className) {
-		for (String path : paths) {
-			searchForClass(path, className);
-		}
-	}
 
 	private void recursivelySearchInDirectory(File searchPath, String className) {
 
 		try {
 			File[] allFiles = searchPath.listFiles();
 			if (allFiles == null || allFiles.length == 0) {
-				return ;
+				return;
 			}
 			for (File currentFile : allFiles) {
 				throwExceptionIfAborted();
