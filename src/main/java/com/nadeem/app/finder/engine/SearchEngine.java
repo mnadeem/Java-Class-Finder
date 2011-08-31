@@ -29,8 +29,10 @@ public class SearchEngine {
 			outputLogger.logResult(ResultType.INVALID.buildMessage(path));	
 		} else if(FileType.isCompressedFile(searchPath.getName())) {
 			recursivelySearchInArchiveFile(searchPath, className);
-		} else {
+		} else if(searchPath.isDirectory()){
 			doSearchForClassInDirectory(searchPath, className);
+		} else {
+			logIfCurrentFileMatched(searchPath, className);
 		}
 	}
 
