@@ -20,7 +20,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 
 import com.nadeem.app.finder.util.EmptyEnumeration;
-import com.nadeem.app.finder.util.OutputLogger;
+import com.nadeem.app.finder.util.LogListener;
 import com.nadeem.app.finder.util.ResultType;
 
 public class SearchEngineTest {
@@ -30,7 +30,7 @@ public class SearchEngineTest {
 	private static final String ARCHIVE_FIE = "archiveFile.zip";
 
 	@Mock
-	private OutputLogger mockedLogger;
+	private LogListener mockedLogger;
 	@Mock
 	private File mockedFile;
 	@Mock
@@ -56,7 +56,7 @@ public class SearchEngineTest {
 
 		targetBeingTested.searchForClass(paths, SOME_CLASS);
 
-		verify(mockedLogger, times(1)).logResult(anyString());
+		verify(mockedLogger, times(1)).onLog(anyString());
 	}
 	
 	@Test
@@ -66,7 +66,7 @@ public class SearchEngineTest {
 
 		targetBeingTested.searchForClass(SOME_PATH, SOME_CLASS);
 
-		verify(mockedLogger).logResult(argumentCaptor.capture());
+		verify(mockedLogger).onLog(argumentCaptor.capture());
 		assertEquals(ResultType.INVALID.buildMessage(SOME_PATH), argumentCaptor.getValue());
 	}
 
@@ -81,7 +81,7 @@ public class SearchEngineTest {
 		targetBeingTested.searchForClass(SOME_PATH, SOME_CLASS);
 
 		ArgumentCaptor<String> argumentCaptor = ArgumentCaptor.forClass(String.class);
-		verify(mockedLogger).logResult(argumentCaptor.capture());
+		verify(mockedLogger).onLog(argumentCaptor.capture());
 		assertEquals(ResultType.DIRECTORY.buildMessage(SOME_CLASS + " Found in : " +new File(SOME_CLASS).getAbsolutePath()), argumentCaptor.getValue());
 	}
 	
@@ -96,7 +96,7 @@ public class SearchEngineTest {
 		targetBeingTested.searchForClass(SOME_PATH, SOME_CLASS);
 		
 		ArgumentCaptor<String> argumentCaptor = ArgumentCaptor.forClass(String.class);
-		verify(mockedLogger).logResult(argumentCaptor.capture());
+		verify(mockedLogger).onLog(argumentCaptor.capture());
 		assertEquals(ResultType.DIRECTORY.buildMessage(SOME_CLASS + " Found in : " + new File(SOME_CLASS).getAbsolutePath()), argumentCaptor.getValue());
 
 	}
@@ -114,7 +114,7 @@ public class SearchEngineTest {
 		targetBeingTested.searchForClass(SOME_PATH, SOME_CLASS);
 
 		ArgumentCaptor<String> argumentCaptor = ArgumentCaptor.forClass(String.class);
-		verify(mockedLogger).logResult(argumentCaptor.capture());
+		verify(mockedLogger).onLog(argumentCaptor.capture());
 		assertEquals(ResultType.ABORTED.toString(), argumentCaptor.getValue());
 	}
 	
@@ -154,7 +154,7 @@ public class SearchEngineTest {
 
 	private class MockedSearchEngine extends SearchEngine {
 
-		public MockedSearchEngine(OutputLogger outputLogger) {
+		public MockedSearchEngine(LogListener outputLogger) {
 			super(outputLogger);
 		}
 

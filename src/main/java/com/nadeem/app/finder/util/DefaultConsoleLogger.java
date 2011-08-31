@@ -1,8 +1,8 @@
 package com.nadeem.app.finder.util;
 
-public class DefaultConsoleLogger implements OutputLogger {
+public class DefaultConsoleLogger implements LogListener {
 
-	public void logResult(String message) {
+	public void onLog(String message) {
 		System.out.println(message);		
 	}
 }

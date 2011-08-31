@@ -9,17 +9,17 @@ import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
 import com.nadeem.app.finder.util.FileType;
-import com.nadeem.app.finder.util.OutputLogger;
+import com.nadeem.app.finder.util.LogListener;
 import com.nadeem.app.finder.util.ResultType;
 import com.nadeem.app.finder.util.SearchAbortedException;
 
 public class SearchEngine {
 
-	private OutputLogger outputLogger;
+	private LogListener logListener;
 	private Boolean abortSearch 		= Boolean.FALSE;
 
-	public SearchEngine(OutputLogger outputLogger) {
-		this.outputLogger = outputLogger;
+	public SearchEngine(LogListener outputLogger) {
+		this.logListener = outputLogger;
 	}
 
 	public void searchForClass(Set<String> paths, String className) {
@@ -32,7 +32,7 @@ public class SearchEngine {
 
 		File searchPath = searchPath(path);
 		if (!searchPath.exists()) {
-			outputLogger.logResult(ResultType.INVALID.buildMessage(path));
+			logListener.onLog(ResultType.INVALID.buildMessage(path));
 		} else if (FileType.isCompressedFile(searchPath.getName())) {
 			recursivelySearchInArchiveFile(searchPath, className);
 		} else if (searchPath.isDirectory()) {
@@ -61,7 +61,7 @@ public class SearchEngine {
 				}
 			}
 		} catch (SearchAbortedException e) {
-			outputLogger.logResult(ResultType.ABORTED.toString());
+			logListener.onLog(ResultType.ABORTED.toString());
 		}
 	}
 
@@ -74,7 +74,7 @@ public class SearchEngine {
 
 	private void logIfCurrentFileMatched(File fileSystem, String className) {
 		if (getSimpleFileName(fileSystem.getName()).equalsIgnoreCase(className)) {
-		      this.outputLogger.logResult(ResultType.DIRECTORY.buildMessage(className + " Found in : " +  fileSystem.getAbsolutePath()));
+		      this.logListener.onLog(ResultType.DIRECTORY.buildMessage(className + " Found in : " +  fileSystem.getAbsolutePath()));
 		}
 	}
 
@@ -109,7 +109,7 @@ public class SearchEngine {
 				//TODO : Add support to read from a archive file which is inside a archive file.
 
 				if (!zipEntry.getName().endsWith("/") && getSimpleZipFileName(zipEntry.getName()).equalsIgnoreCase(className)) {
-				      this.outputLogger.logResult(ResultType.ARCHIVE.buildMessage(zipEntry.getName() + " Found in : " +  currentFile.getAbsolutePath()));
+				      this.logListener.onLog(ResultType.ARCHIVE.buildMessage(zipEntry.getName() + " Found in : " +  currentFile.getAbsolutePath()));
 				}
 			}
 		} catch (ZipException e) {
