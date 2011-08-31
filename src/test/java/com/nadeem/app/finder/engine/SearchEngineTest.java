@@ -8,15 +8,18 @@ import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.zip.ZipException;
+import java.util.zip.ZipFile;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 
-import com.nadeem.app.finder.engine.SearchEngine;
+import com.nadeem.app.finder.util.EmptyEnumeration;
 import com.nadeem.app.finder.util.OutputLogger;
 import com.nadeem.app.finder.util.ResultType;
 
@@ -32,6 +35,9 @@ public class SearchEngineTest {
 	private File mockedFile;
 	@Mock
 	private File nextFile;
+	@Mock
+	private ZipFile mockedZipFile;
+	
 
 	private Set<String> paths;
 	
@@ -58,6 +64,7 @@ public class SearchEngineTest {
 	@Test
 	public void shouldLogAbortedMessage() throws Exception {
 		when(mockedFile.exists()).thenReturn(Boolean.TRUE);
+		when(mockedFile.listFiles()).thenReturn(new File[] {new File(SOME_CLASS)});
 		ArgumentCaptor<String> argumentCaptor = ArgumentCaptor.forClass(String.class);
 		targetBeingTested.abortSearch();
 		
@@ -87,18 +94,20 @@ public class SearchEngineTest {
 		targetBeingTested.searchForClass(SOME_PATH, SOME_CLASS);
 		
 		verify(mockedLogger).logResult(argumentCaptor.capture());
-		assertEquals(ResultType.DIRECTORY.buildMessage(new File(SOME_CLASS).getAbsolutePath()), argumentCaptor.getValue());
+		assertEquals(ResultType.DIRECTORY.buildMessage(SOME_CLASS + " Found in : " +new File(SOME_CLASS).getAbsolutePath()), argumentCaptor.getValue());
 	}
 	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void shouldSearchForFileInArchive () throws Exception {
 		when(mockedFile.exists()).thenReturn(Boolean.TRUE);
 		when(mockedFile.listFiles()).thenReturn(new File[] {nextFile});
 		when(nextFile.getName()).thenReturn(ARCHIVE_FIE);
+		when(mockedZipFile.entries()).thenReturn(new EmptyEnumeration());
 		
 		targetBeingTested.searchForClass(SOME_PATH, SOME_CLASS);
 		
-		verify(nextFile).getName();
+		verify(mockedZipFile).entries();
 		
 	}
 	
@@ -125,6 +134,10 @@ public class SearchEngineTest {
 		@Override
 		protected File searchPath(String path) {
 			return mockedFile;
+		}
+		@Override
+		protected ZipFile newZipFile(File currentFile) throws ZipException,IOException {
+			return mockedZipFile;
 		}
 	}
 
