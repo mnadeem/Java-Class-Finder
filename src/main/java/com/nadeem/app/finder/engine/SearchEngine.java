@@ -25,10 +25,12 @@ public class SearchEngine {
 	public void searchForClass(String path, String className) {
 
 		File searchPath = searchPath(path);
-		if (searchPath.exists()) {
-			doSearchForClassInDirectory(searchPath, className);
+		if (!searchPath.exists()) {
+			outputLogger.logResult(ResultType.INVALID.buildMessage(path));	
+		} else if(FileType.isCompressedFile(searchPath.getName())) {
+			recursivelySearchInArchiveFile(searchPath, className);
 		} else {
-			outputLogger.logResult(ResultType.INVALID.buildMessage(path));
+			doSearchForClassInDirectory(searchPath, className);
 		}
 	}
 
@@ -52,7 +54,7 @@ public class SearchEngine {
 				} else if (currentFile.isDirectory()) {
 					doSearchForClassInDirectory(currentFile, className);
 				} else {
-					doSearchInFileSystem(currentFile, className);
+					logIfCurrentFileMatched(currentFile, className);
 				}
 			}
 		} catch (SearchAbortedException e) {
@@ -67,7 +69,7 @@ public class SearchEngine {
 	}
 
 
-	private void doSearchInFileSystem(File fileSystem, String className) {
+	private void logIfCurrentFileMatched(File fileSystem, String className) {
 		if (getSimpleFileName(fileSystem.getName()).equalsIgnoreCase(className)) {
 		      this.outputLogger.logResult(ResultType.DIRECTORY.buildMessage(className + " Found in : " +  fileSystem.getAbsolutePath()));
 		}

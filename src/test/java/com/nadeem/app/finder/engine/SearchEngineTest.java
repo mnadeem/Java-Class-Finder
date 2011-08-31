@@ -64,6 +64,7 @@ public class SearchEngineTest {
 	@Test
 	public void shouldLogAbortedMessage() throws Exception {
 		when(mockedFile.exists()).thenReturn(Boolean.TRUE);
+		when(mockedFile.getName()).thenReturn(SOME_PATH);
 		when(mockedFile.listFiles()).thenReturn(new File[] {new File(SOME_CLASS)});
 		ArgumentCaptor<String> argumentCaptor = ArgumentCaptor.forClass(String.class);
 		targetBeingTested.abortSearch();
@@ -88,6 +89,7 @@ public class SearchEngineTest {
 	@Test
 	public void shouldLogToLoggerWhenClassFoundInTheDirectory () throws Exception {
 		when(mockedFile.exists()).thenReturn(Boolean.TRUE);
+		when(mockedFile.getName()).thenReturn(SOME_PATH);
 		ArgumentCaptor<String> argumentCaptor = ArgumentCaptor.forClass(String.class);
 		when(mockedFile.listFiles()).thenReturn(new File[] {new File(SOME_CLASS)});
 		
@@ -101,6 +103,7 @@ public class SearchEngineTest {
 	@Test
 	public void shouldSearchForFileInArchive () throws Exception {
 		when(mockedFile.exists()).thenReturn(Boolean.TRUE);
+		when(mockedFile.getName()).thenReturn(SOME_PATH);
 		when(mockedFile.listFiles()).thenReturn(new File[] {nextFile});
 		when(nextFile.getName()).thenReturn(ARCHIVE_FIE);
 		when(mockedZipFile.entries()).thenReturn(new EmptyEnumeration());
@@ -113,7 +116,8 @@ public class SearchEngineTest {
 	
 	@Test
 	public void shouldSearchForFilesRecursivelly() throws Exception {
-		when(mockedFile.exists()).thenReturn(Boolean.TRUE);		
+		when(mockedFile.exists()).thenReturn(Boolean.TRUE);	
+		when(mockedFile.getName()).thenReturn(SOME_PATH);
 		when(mockedFile.listFiles()).thenReturn(new File[] {nextFile});
 		when(nextFile.getName()).thenReturn(SOME_CLASS);
 		when(nextFile.isDirectory()).thenReturn(Boolean.TRUE);		
