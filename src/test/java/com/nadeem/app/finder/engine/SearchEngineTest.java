@@ -76,6 +76,7 @@ public class SearchEngineTest {
 		when(mockedFile.exists()).thenReturn(Boolean.TRUE);
 		when(mockedFile.isDirectory()).thenReturn(Boolean.TRUE);
 		when(mockedFile.getName()).thenReturn(SOME_PATH);
+
 		when(mockedFile.listFiles()).thenReturn(new File[] {new File(SOME_CLASS)});
 
 		targetBeingTested.searchForClass(SOME_PATH, SOME_CLASS);
@@ -90,6 +91,7 @@ public class SearchEngineTest {
 		when(mockedFile.exists()).thenReturn(Boolean.TRUE);
 		when(mockedFile.isDirectory()).thenReturn(Boolean.FALSE);
 		when(mockedFile.getName()).thenReturn(SOME_CLASS);
+
 		when(mockedFile.getAbsolutePath()).thenReturn(new File(SOME_CLASS).getAbsolutePath());
 
 		targetBeingTested.searchForClass(SOME_PATH, SOME_CLASS);
