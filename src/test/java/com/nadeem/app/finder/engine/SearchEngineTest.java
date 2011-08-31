@@ -38,7 +38,6 @@ public class SearchEngineTest {
 	@Mock
 	private ZipFile mockedZipFile;
 
-
 	private Set<String> paths;
 
 	private SearchEngine targetBeingTested;
@@ -134,7 +133,7 @@ public class SearchEngineTest {
 
 		verify(nextFile).isDirectory();
 	}
-	
+
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
@@ -153,9 +152,6 @@ public class SearchEngineTest {
 
 	}
 
-	
-	
-
 	private class MockedSearchEngine extends SearchEngine {
 
 		public MockedSearchEngine(OutputLogger outputLogger) {
@@ -171,5 +167,4 @@ public class SearchEngineTest {
 			return mockedZipFile;
 		}
 	}
-
 }

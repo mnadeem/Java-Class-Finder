@@ -30,7 +30,7 @@ public class SearchEngine {
 		} else if (FileType.isCompressedFile(searchPath.getName())) {
 			recursivelySearchInArchiveFile(searchPath, className);
 		} else if (searchPath.isDirectory()) {
-			doSearchForClassInDirectory(searchPath, className);
+			recursivelySearchForClassInDirectory(searchPath, className);
 		} else {
 			logIfCurrentFileMatched(searchPath, className);
 		}
@@ -42,7 +42,7 @@ public class SearchEngine {
 		}
 	}
 
-	private void doSearchForClassInDirectory(File searchPath, String className) {
+	private void recursivelySearchForClassInDirectory(File searchPath, String className) {
 
 		try {
 			File[] allFiles = searchPath.listFiles();
@@ -54,7 +54,7 @@ public class SearchEngine {
 				if (FileType.isCompressedFile(currentFile.getName())) {
 					recursivelySearchInArchiveFile(currentFile, className);
 				} else if (currentFile.isDirectory()) {
-					doSearchForClassInDirectory(currentFile, className);
+					recursivelySearchForClassInDirectory(currentFile, className);
 				} else {
 					logIfCurrentFileMatched(currentFile, className);
 				}
