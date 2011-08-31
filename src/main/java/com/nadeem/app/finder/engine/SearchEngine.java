@@ -79,13 +79,13 @@ public class SearchEngine {
 	}
 
 	private String getSimpleFileName(String fileName) {
-		int dot = lastIndexOfDot(fileName);
+		int dot = lastIndexOfDot(fileName, 0);
 	    return fileName.substring(0, dot);
 	}
 
 	private String getSimpleZipFileName(String zipEntryName) {
-		int dot 	= lastIndexOfDot(zipEntryName);
 		int slash 	= lastIndexOfSlash(zipEntryName);
+		int dot 	= lastIndexOfDot(zipEntryName, slash);
 	    return zipEntryName.substring(slash + 1, dot);
 	}
 
@@ -93,8 +93,8 @@ public class SearchEngine {
 		return zipEntryName.lastIndexOf('/');
 	}
 
-	private int lastIndexOfDot(String fileName) {
-		int dot = fileName.lastIndexOf('.');
+	private int lastIndexOfDot(String fileName, int fromIndex) {
+		int dot = fileName.indexOf('.', fromIndex);
 		 dot = (dot == -1) ? fileName.length() : dot;
 		return dot;
 	}
@@ -108,8 +108,13 @@ public class SearchEngine {
 
 				//TODO : Add support to read from a archive file which is inside a archive file.
 
-				if (!zipEntry.getName().endsWith("/") && getSimpleZipFileName(zipEntry.getName()).equalsIgnoreCase(className)) {
-				      this.logListener.onLog(ResultType.ARCHIVE.buildMessage(zipEntry.getName() + " Found in : " +  currentFile.getAbsolutePath()));
+				try {
+					if (!zipEntry.getName().endsWith("/") && getSimpleZipFileName(zipEntry.getName()).equalsIgnoreCase(className)) {
+					      this.logListener.onLog(ResultType.ARCHIVE.buildMessage(zipEntry.getName() + " Found in : " +  currentFile.getAbsolutePath()));
+					}
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
 			}
 		} catch (ZipException e) {
