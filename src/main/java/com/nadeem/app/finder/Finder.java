@@ -10,8 +10,10 @@ public class Finder {
 	public static void main(String[] args) {
 		
 		if (shouldGoCommandLine(args)) {
+			System.out.println("\n**** You are using the Command Line version of Finder !!! ****\n");
 			goCommandLine(args);
 		} else {
+			System.out.println("\n****You are using the GUI version of Finder, Not yet Implemented !!! ****\n");
 			goGUI();
 		}
 	}	
@@ -23,24 +25,30 @@ public class Finder {
 		} else {		
 			engine.searchForClass(params[0], params[1]);
 		}
+		goFurther(engine);
+	}
 
-		Scanner scanner = new Scanner(System.in);
+	private static void goFurther(final SearchEngine engine) {
+		final Scanner scanner = new Scanner(System.in);
 		String location;
 		String className;
+		String userDecision;
 		
 		while(true) {
-			System.out.println("Do you want to Contiune ? Enter N for No, Y for Yes");
-			if ("N".equalsIgnoreCase(scanner.nextLine())) {
-				System.out.println("Bye, bye");
+			userDecision = getString("\nDo you want to Contiune ? Enter N for No, Y for Yes", scanner);
+			if ("N".equalsIgnoreCase(userDecision)) {
+				System.out.println("\nBye, bye");
 				break;
 			}
-			System.out.print("Enter Search Location : ");
-			location = scanner.nextLine();
-			System.out.print("Enter Class name : ");
-			className= scanner.nextLine();
+			location  = getString("Enter Search Location", scanner);
+			className = getString("Enter Class name", scanner);
 			engine.searchForClass(location, className);
-		}		
-			
+		}
+	}
+
+	private static String getString(String message, Scanner scanner) {
+		System.out.print(message + " : ");
+		return scanner.nextLine();
 	}
 	
 	private static Boolean isHelpRequired(String[] params) {
@@ -48,7 +56,9 @@ public class Finder {
 	}
 	
 	private static void helpUser(String[] params) {
-		System.out.println("Format : java -jar finder.jar [location] [ClassName]");		
+		System.out.println("It seems you are using the CL Version incorrectly");
+		System.out.println("Correct Format : java -jar finder.jar [location] [ClassName]");
+		System.out.println("Never mind I can simplify It, just follow the instructions ");
 	}
 
 	private static boolean shouldGoCommandLine(String[] args) {
