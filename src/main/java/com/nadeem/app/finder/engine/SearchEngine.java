@@ -26,10 +26,10 @@ public class SearchEngine {
 
 		File searchPath = searchPath(path);
 		if (!searchPath.exists()) {
-			outputLogger.logResult(ResultType.INVALID.buildMessage(path));	
-		} else if(FileType.isCompressedFile(searchPath.getName())) {
+			outputLogger.logResult(ResultType.INVALID.buildMessage(path));
+		} else if (FileType.isCompressedFile(searchPath.getName())) {
 			recursivelySearchInArchiveFile(searchPath, className);
-		} else if(searchPath.isDirectory()){
+		} else if (searchPath.isDirectory()) {
 			doSearchForClassInDirectory(searchPath, className);
 		} else {
 			logIfCurrentFileMatched(searchPath, className);
@@ -99,7 +99,7 @@ public class SearchEngine {
 	}
 
 	private void recursivelySearchInArchiveFile(File currentFile, String className) {
-		
+
 		try {
 			ZipFile archiveFile = newZipFile(currentFile);
 			for (ZipEntry zipEntry : Collections.list(archiveFile.entries())) {
