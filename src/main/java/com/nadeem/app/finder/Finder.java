@@ -3,6 +3,7 @@ package com.nadeem.app.finder;
 import java.util.Scanner;
 
 import com.nadeem.app.finder.engine.SearchEngine;
+import com.nadeem.app.finder.modal.SearchCriteria;
 import com.nadeem.app.finder.util.DefaultConsoleLogger;
 
 public class Finder {
@@ -33,12 +34,12 @@ public class Finder {
 	}
 
 	private static Boolean isHelpRequired(String[] params) {
-		return params.length != 2;
+		return !(params.length > 1 && params.length < 4);
 	}
 
 	private static void helpUser(String[] params) {
 		System.out.println("It seems you are using the CL Version incorrectly");
-		System.out.println("Correct Format : java -jar finder.jar [location] [ClassName]");
+		System.out.println("Correct Format : java -jar finder.jar location ClassName [recursiveArchiveSearch = {y,n}]");
 		System.out.println("Never mind I can simplify It, just follow the instructions ");
 	}
 
@@ -47,6 +48,7 @@ public class Finder {
 		String location;
 		String className;
 		String userDecision;
+		String recursiveArchiveSearch;
 
 		while (true) {
 			userDecision = getString("\nDo you want to Contiune ? Enter N for No, Y for Yes", scanner);
@@ -56,8 +58,13 @@ public class Finder {
 			}
 			location  = getString("Enter Search Location", scanner);
 			className = getString("Enter Class name", scanner);
-			engine.searchForClass(location, className);
+			recursiveArchiveSearch = getString("Search Recursively in the Archive file. Searching recursively in an archive file is a time consuming process? [y,n]", scanner);
+			engine.searchForClass(new SearchCriteria(location, className, getYesNoAsBoolean(recursiveArchiveSearch)));
 		}
+	}
+
+	private static Boolean getYesNoAsBoolean(String recursiveArchiveSearch) {
+		return "Y".equalsIgnoreCase(recursiveArchiveSearch);
 	}
 
 	private static String getString(String message, Scanner scanner) {

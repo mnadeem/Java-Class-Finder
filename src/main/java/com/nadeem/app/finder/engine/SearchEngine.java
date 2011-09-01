@@ -1,5 +1,9 @@
 package com.nadeem.app.finder.engine;
 
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
@@ -7,6 +11,7 @@ import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 
 import com.nadeem.app.finder.modal.SearchCriteria;
 import com.nadeem.app.finder.util.FileType;
@@ -16,9 +21,10 @@ import com.nadeem.app.finder.util.SearchAbortedException;
 
 public class SearchEngine {
 	
-	private static char FILE_SEPERATOR 	= System.getProperty("file.separator").toCharArray()[0];
+	private static char FILE_SEPERATOR 		= System.getProperty("file.separator").toCharArray()[0];
+	static private final int BUFFER_SIZE 	= 4096;
 
-	private Boolean abortSearch 		= Boolean.FALSE;
+	private Boolean abortSearch 			= Boolean.FALSE;
 	private LogListener logListener;
 
 	public SearchEngine(LogListener logListener) {
@@ -50,10 +56,70 @@ public class SearchEngine {
 	
 	private void searchInArchiveFile(File searchPath, SearchCriteria criteria) {
 		if (criteria.recursiveArchiveSearch()) {
-			
+			recursivelySearchInArchiveFile(searchPath, criteria);
 		} else {
 			nonRecursivelySearchInArchiveFile(searchPath, criteria);
 		}
+	}
+
+	private void recursivelySearchInArchiveFile(File searchPath, SearchCriteria criteria) {
+		ZipFile archiveFile	= null;
+		ZipInputStream zipInputStream = null;
+		try {
+			
+			archiveFile = new ZipFile(searchPath);
+			for (ZipEntry zipEntry : Collections.list(archiveFile.entries())) {
+				throwExceptionIfAborted();
+				if (!zipEntry.isDirectory() && !zipEntry.getName().endsWith(String.valueOf(FILE_SEPERATOR)) && getSimpleZipFileName(zipEntry.getName()).equalsIgnoreCase(criteria.getFileName())) {
+				      this.logListener.onLog(ResultType.ARCHIVE.buildMessage(zipEntry.getName() + " Found in : " +  searchPath.getAbsolutePath()));
+				} else if (FileType.isCompressedFile(zipEntry.getName())) {
+					zipInputStream = new ZipInputStream(archiveFile.getInputStream(zipEntry));
+					recursiveSearchInArchiveFile(zipInputStream, searchPath, criteria);
+				}								
+				
+			}
+			
+		} catch (ZipException e) {
+			// Ignore
+		} catch (IOException e) {
+			// Ignore
+		} finally {
+			closeQuietly(archiveFile);
+			closeQuietly(zipInputStream);
+		}		
+	}
+	
+	private void recursiveSearchInArchiveFile (ZipInputStream zipInputStream, File searchPath, SearchCriteria criteria) {
+		ZipInputStream localZipInputStream = null;
+		try {
+			ZipEntry localZipEntry = zipInputStream.getNextEntry();
+			
+			if (localZipEntry == null) {
+				return ;
+			}
+			
+			if (!localZipEntry.isDirectory() && !localZipEntry.getName().endsWith(String.valueOf(FILE_SEPERATOR)) && getSimpleZipFileName(localZipEntry.getName()).equalsIgnoreCase(criteria.getFileName())) {
+			      this.logListener.onLog(ResultType.ARCHIVE.buildMessage(localZipEntry.getName() + " Found in : " +  searchPath.getAbsolutePath()));
+			} else if (FileType.isCompressedFile(localZipEntry.getName())) {
+				localZipInputStream = getZipInputStream(zipInputStream);
+				recursiveSearchInArchiveFile(localZipInputStream, searchPath, criteria);
+			}
+		} catch (Exception e) {			
+			//Ignore
+		} finally {	
+			closeQuietly(localZipInputStream);
+		}
+	}
+	
+	private ZipInputStream getZipInputStream (ZipInputStream zipInputStream) throws IOException {
+		int count;
+		byte data[] = new byte[BUFFER_SIZE];
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(outputStream, BUFFER_SIZE);
+		while ((count = zipInputStream.read(data, 0, BUFFER_SIZE)) != -1) {
+	        bufferedOutputStream.write(data, 0, count);
+	    }
+		return new ZipInputStream(new ByteArrayInputStream(outputStream.toByteArray()));
 	}
 
 	private void recursivelySearchInDirectory(File searchPath, SearchCriteria criteria) {
@@ -66,7 +132,7 @@ public class SearchEngine {
 			for (File currentFile : allFiles) {
 				throwExceptionIfAborted();
 				if (FileType.isCompressedFile(currentFile.getName())) {
-					nonRecursivelySearchInArchiveFile(currentFile, criteria);
+					searchInArchiveFile(currentFile, criteria);
 				} else if (currentFile.isDirectory()) {
 					recursivelySearchInDirectory(currentFile, criteria);
 				} else {
@@ -130,6 +196,7 @@ public class SearchEngine {
 			// Ignore
 		} finally {
 			closeQuietly(archiveFile);
+			
 		}
 	}
 
@@ -137,6 +204,15 @@ public class SearchEngine {
 		if (archiveFile != null) {
 			try {
 				archiveFile.close();
+			} catch (Exception e) {
+				// Ignore
+			}
+		}
+	}
+	private void closeQuietly(Closeable closeable) {
+		if (closeable != null) {
+			try {
+				closeable.close();
 			} catch (Exception e) {
 				// Ignore
 			}

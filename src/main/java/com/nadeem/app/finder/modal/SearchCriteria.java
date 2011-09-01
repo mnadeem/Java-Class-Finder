@@ -15,14 +15,12 @@ public class SearchCriteria {
 	
 	public SearchCriteria(String path, String fileName) {
 		paths.add(path);
-		this.fileName = fileName;
-		this.recursiveArchiveSearch = Boolean.FALSE; 
+		this.fileName = fileName; 
 	}
 	
 	public SearchCriteria(Set<String> paths, String fileName) {
 		this.paths = paths;
-		this.fileName = fileName;
-		this.recursiveArchiveSearch = Boolean.FALSE; 
+		this.fileName = fileName; 
 	}
 	
 	public SearchCriteria(String path, String fileName, Boolean recursiveArchiveSearch) {
