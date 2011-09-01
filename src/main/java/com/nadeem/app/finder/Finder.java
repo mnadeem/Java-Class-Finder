@@ -28,9 +28,17 @@ public class Finder {
 		if (isHelpRequired(params)) {
 			helpUser(params);
 		} else {
-			engine.searchForClass(params[0], params[1]);
+			performSearchWithParmetersProvided(params, engine);
 		}
 		goFurther(engine);
+	}
+
+	private static void performSearchWithParmetersProvided(String[] params, SearchEngine engine) {
+		if (params.length == 3) {
+			engine.searchForClass(new SearchCriteria(params[0], params[1], getYesNoAsBoolean(params[2])));
+		} else {
+			engine.searchForClass(params[0], params[1]);
+		}
 	}
 
 	private static Boolean isHelpRequired(String[] params) {
@@ -39,7 +47,7 @@ public class Finder {
 
 	private static void helpUser(String[] params) {
 		System.out.println("It seems you are using the CL Version incorrectly");
-		System.out.println("Correct Format : java -jar finder.jar location ClassName [recursiveArchiveSearch = {y,n}]");
+		System.out.println("Correct Format : java -jar finder.jar location ClassName [deepSearch = {y,n}]");
 		System.out.println("Never mind I can simplify It, just follow the instructions ");
 	}
 
@@ -48,7 +56,7 @@ public class Finder {
 		String location;
 		String className;
 		String userDecision;
-		String recursiveArchiveSearch;
+		String deepSearch;
 
 		while (true) {
 			userDecision = getString("\nDo you want to Contiune ? Enter N for No, Y for Yes", scanner);
@@ -58,8 +66,8 @@ public class Finder {
 			}
 			location  = getString("Enter Search Location", scanner);
 			className = getString("Enter Class name", scanner);
-			recursiveArchiveSearch = getString("Search Recursively in the Archive file. Searching recursively in an archive file is a time consuming process? [y,n]", scanner);
-			engine.searchForClass(new SearchCriteria(location, className, getYesNoAsBoolean(recursiveArchiveSearch)));
+			deepSearch = getString("Search Recursively in the Archive file? Searching recursively in an archive file is a time consuming process![y,n]", scanner);
+			engine.searchForClass(new SearchCriteria(location, className, getYesNoAsBoolean(deepSearch)));
 		}
 	}
 

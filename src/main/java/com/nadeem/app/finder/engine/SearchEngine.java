@@ -60,7 +60,7 @@ public class SearchEngine {
 	}
 
 	private void searchInArchiveFile(File searchPath, SearchCriteria criteria) {
-		if (criteria.recursiveArchiveSearch()) {
+		if (criteria.deepSearch()) {
 			recursivelySearchInArchiveFile(searchPath, criteria);
 		} else {
 			nonRecursivelySearchInArchiveFile(searchPath, criteria);
