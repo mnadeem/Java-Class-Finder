@@ -8,6 +8,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
+import com.nadeem.app.finder.modal.SearchCriteria;
 import com.nadeem.app.finder.util.FileType;
 import com.nadeem.app.finder.util.LogListener;
 import com.nadeem.app.finder.util.ResultType;
@@ -24,28 +25,38 @@ public class SearchEngine {
 		this.logListener = logListener;
 	}
 
-	public void searchForClass(Set<String> paths, String className) {
-		for (String path : paths) {
-			searchForClass(path, className);
-		}
+	public void searchForClass(Set<String> paths, String fileName) {
+		searchForClass(new SearchCriteria(paths, fileName));
 	}
 
-	public void searchForClass(String path, String className) {
-
-		File searchPath = searchPath(path);
-		if (!searchPath.exists()) {
-			logListener.onLog(ResultType.INVALID.buildMessage(path));
-		} else if (FileType.isCompressedFile(searchPath.getName())) {
-			nonRecursivelySearchInArchiveFile(searchPath, className);
-		} else if (searchPath.isDirectory()) {
-			recursivelySearchInDirectory(searchPath, className);
+	public void searchForClass(String path, String fileName) {
+		searchForClass(new SearchCriteria(path, fileName));
+	}
+	
+	public void searchForClass(final SearchCriteria criteria) {
+		for (String path : criteria.getPaths()) {
+			File searchPath = searchPath(path);
+			if (!searchPath.exists()) {
+				logListener.onLog(ResultType.INVALID.buildMessage(path));
+			} else if (FileType.isCompressedFile(searchPath.getName())) {
+				searchInArchiveFile(searchPath, criteria);
+			} else if (searchPath.isDirectory()) {
+				recursivelySearchInDirectory(searchPath, criteria);
+			} else {
+				logIfCurrentFileMatched(searchPath, criteria);
+			}
+		}
+	}
+	
+	private void searchInArchiveFile(File searchPath, SearchCriteria criteria) {
+		if (criteria.recursiveArchiveSearch()) {
+			
 		} else {
-			logIfCurrentFileMatched(searchPath, className);
+			nonRecursivelySearchInArchiveFile(searchPath, criteria);
 		}
 	}
 
-
-	private void recursivelySearchInDirectory(File searchPath, String className) {
+	private void recursivelySearchInDirectory(File searchPath, SearchCriteria criteria) {
 
 		try {
 			File[] allFiles = searchPath.listFiles();
@@ -55,11 +66,11 @@ public class SearchEngine {
 			for (File currentFile : allFiles) {
 				throwExceptionIfAborted();
 				if (FileType.isCompressedFile(currentFile.getName())) {
-					nonRecursivelySearchInArchiveFile(currentFile, className);
+					nonRecursivelySearchInArchiveFile(currentFile, criteria);
 				} else if (currentFile.isDirectory()) {
-					recursivelySearchInDirectory(currentFile, className);
+					recursivelySearchInDirectory(currentFile, criteria);
 				} else {
-					logIfCurrentFileMatched(currentFile, className);
+					logIfCurrentFileMatched(currentFile, criteria);
 				}
 			}
 		} catch (SearchAbortedException e) {
@@ -74,9 +85,9 @@ public class SearchEngine {
 	}
 
 
-	private void logIfCurrentFileMatched(File fileSystem, String className) {
-		if (getSimpleFileName(fileSystem.getName()).equalsIgnoreCase(className)) {
-		      this.logListener.onLog(ResultType.DIRECTORY.buildMessage(className + " Found in : " +  fileSystem.getAbsolutePath()));
+	private void logIfCurrentFileMatched(File fileSystem, SearchCriteria criteria) {
+		if (getSimpleFileName(fileSystem.getName()).equalsIgnoreCase(criteria.getFileName())) {
+		      this.logListener.onLog(ResultType.DIRECTORY.buildMessage(criteria.getFileName() + " Found in : " +  fileSystem.getAbsolutePath()));
 		}
 	}
 
@@ -101,16 +112,14 @@ public class SearchEngine {
 		return dot;
 	}
 
-	private void nonRecursivelySearchInArchiveFile(File currentFile, String className) {
-
+	private void nonRecursivelySearchInArchiveFile(File currentFile, SearchCriteria criteria) {
+		ZipFile archiveFile	= null;
 		try {
-			ZipFile archiveFile = newZipFile(currentFile);
+			archiveFile = newZipFile(currentFile);
 			for (ZipEntry zipEntry : Collections.list(archiveFile.entries())) {
 				throwExceptionIfAborted();
-
-				//TODO : Add support to read from a archive file which is inside a archive file.
 				
-				if (!zipEntry.getName().endsWith(String.valueOf(FILE_SEPERATOR)) && getSimpleZipFileName(zipEntry.getName()).equalsIgnoreCase(className)) {
+				if (!zipEntry.getName().endsWith(String.valueOf(FILE_SEPERATOR)) && getSimpleZipFileName(zipEntry.getName()).equalsIgnoreCase(criteria.getFileName())) {
 				      this.logListener.onLog(ResultType.ARCHIVE.buildMessage(zipEntry.getName() + " Found in : " +  currentFile.getAbsolutePath()));
 				}
 				
@@ -119,6 +128,18 @@ public class SearchEngine {
 			// Ignore
 		} catch (IOException e) {
 			// Ignore
+		} finally {
+			closeQuietly(archiveFile);
+		}
+	}
+
+	private void closeQuietly(ZipFile archiveFile) {
+		if (archiveFile != null) {
+			try {
+				archiveFile.close();
+			} catch (Exception e) {
+				// Ignore
+			}
 		}
 	}
 
