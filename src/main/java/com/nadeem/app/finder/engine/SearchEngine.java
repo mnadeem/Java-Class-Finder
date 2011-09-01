@@ -80,9 +80,9 @@ public class SearchEngine {
 			}
 			
 		} catch (ZipException e) {
-			// Ignore
+
 		} catch (IOException e) {
-			// Ignore
+
 		} finally {
 			closeQuietly(archiveFile);
 			closeQuietly(zipInputStream);
@@ -90,34 +90,41 @@ public class SearchEngine {
 	}
 	
 	private void recursiveSearchInArchiveFile (ZipInputStream zipInputStream, File searchPath, SearchCriteria criteria) {
-		ZipInputStream localZipInputStream = null;
-		try {
-			ZipEntry localZipEntry = zipInputStream.getNextEntry();
-			
-			if (localZipEntry == null) {
-				return ;
+		
+		while(true) {
+			ZipInputStream localZipInputStream = null;
+			try {
+				ZipEntry localZipEntry = zipInputStream.getNextEntry();
+				
+				if (localZipEntry == null) {
+					return ;
+				}
+				
+				if (!localZipEntry.isDirectory() && !localZipEntry.getName().endsWith(String.valueOf(FILE_SEPERATOR)) && getSimpleZipFileName(localZipEntry.getName()).equalsIgnoreCase(criteria.getFileName())) {
+				      this.logListener.onLog(ResultType.ARCHIVE.buildMessage(localZipEntry.getName() + " Found in : " +  searchPath.getAbsolutePath()));
+				} else if (FileType.isCompressedFile(localZipEntry.getName())) {
+					localZipInputStream = getZipInputStream(zipInputStream, localZipEntry);
+					recursiveSearchInArchiveFile(localZipInputStream, searchPath, criteria);
+				}
+			} catch (Exception e) {			
+
+			} finally {	
+				closeQuietly(localZipInputStream);
 			}
-			
-			if (!localZipEntry.isDirectory() && !localZipEntry.getName().endsWith(String.valueOf(FILE_SEPERATOR)) && getSimpleZipFileName(localZipEntry.getName()).equalsIgnoreCase(criteria.getFileName())) {
-			      this.logListener.onLog(ResultType.ARCHIVE.buildMessage(localZipEntry.getName() + " Found in : " +  searchPath.getAbsolutePath()));
-			} else if (FileType.isCompressedFile(localZipEntry.getName())) {
-				localZipInputStream = getZipInputStream(zipInputStream);
-				recursiveSearchInArchiveFile(localZipInputStream, searchPath, criteria);
-			}
-		} catch (Exception e) {			
-			//Ignore
-		} finally {	
-			closeQuietly(localZipInputStream);
 		}
+		
 	}
 	
-	private ZipInputStream getZipInputStream (ZipInputStream zipInputStream) throws IOException {
+	private ZipInputStream getZipInputStream (ZipInputStream zipInputStream, ZipEntry zipEntry) throws IOException {
 		int count;
-		byte data[] = new byte[BUFFER_SIZE];
-		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-		BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(outputStream, BUFFER_SIZE);
-		while ((count = zipInputStream.read(data, 0, BUFFER_SIZE)) != -1) {
+		byte data[] 	= new byte[BUFFER_SIZE];
+		int remaining 	= (int) zipEntry.getSize();
+		ByteArrayOutputStream outputStream 			= new ByteArrayOutputStream();
+		BufferedOutputStream bufferedOutputStream 	= new BufferedOutputStream(outputStream, BUFFER_SIZE);
+
+		while (remaining > 0 && (count = zipInputStream.read(data, 0, Math.min(BUFFER_SIZE, remaining))) != -1) {
 	        bufferedOutputStream.write(data, 0, count);
+	        remaining -= count;
 	    }
 		return new ZipInputStream(new ByteArrayInputStream(outputStream.toByteArray()));
 	}
@@ -169,7 +176,7 @@ public class SearchEngine {
 	}
 
 	private int lastIndexOfSlash(String zipEntryName) {
-		return zipEntryName.lastIndexOf(FILE_SEPERATOR);
+		return zipEntryName.replace('/', FILE_SEPERATOR).lastIndexOf(FILE_SEPERATOR);
 	}
 
 	private int lastIndexOfDot(String fileName, int fromIndex) {
@@ -191,9 +198,9 @@ public class SearchEngine {
 				
 			}
 		} catch (ZipException e) {
-			// Ignore
+
 		} catch (IOException e) {
-			// Ignore
+
 		} finally {
 			closeQuietly(archiveFile);
 			
@@ -205,7 +212,7 @@ public class SearchEngine {
 			try {
 				archiveFile.close();
 			} catch (Exception e) {
-				// Ignore
+
 			}
 		}
 	}
