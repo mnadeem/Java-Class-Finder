@@ -74,8 +74,8 @@ public class SearchEngine {
 				      this.logListener.onLog(ResultType.ARCHIVE.buildMessage(zipEntry.getName() + " Found in : " +  searchPath.getAbsolutePath()));
 				} else if (FileType.isCompressedFile(zipEntry.getName())) {
 					zipInputStream = new ZipInputStream(archiveFile.getInputStream(zipEntry));
-					recursiveSearchInArchiveFile(zipInputStream, searchPath, criteria);
-				}								
+					recursiveSearchInArchiveFile(zipEntry.getName(), zipInputStream, searchPath, criteria);
+				}					
 				
 			}
 			
@@ -89,7 +89,7 @@ public class SearchEngine {
 		}		
 	}
 	
-	private void recursiveSearchInArchiveFile (ZipInputStream zipInputStream, File searchPath, SearchCriteria criteria) {
+	private void recursiveSearchInArchiveFile (String zipEntryName, ZipInputStream zipInputStream, File searchPath, SearchCriteria criteria) {
 		
 		while(true) {
 			ZipInputStream localZipInputStream = null;
@@ -101,10 +101,11 @@ public class SearchEngine {
 				}
 				
 				if (!localZipEntry.isDirectory() && !localZipEntry.getName().endsWith(String.valueOf(FILE_SEPERATOR)) && getSimpleZipFileName(localZipEntry.getName()).equalsIgnoreCase(criteria.getFileName())) {
-				      this.logListener.onLog(ResultType.ARCHIVE.buildMessage(localZipEntry.getName() + " Found in : " +  searchPath.getAbsolutePath()));
+				      this.logListener.onLog(ResultType.ARCHIVE.buildMessage(zipEntryName + "!/" + localZipEntry.getName() + " Found in : " +  searchPath.getAbsolutePath()));
 				} else if (FileType.isCompressedFile(localZipEntry.getName())) {
+					
 					localZipInputStream = getZipInputStream(zipInputStream, localZipEntry);
-					recursiveSearchInArchiveFile(localZipInputStream, searchPath, criteria);
+					recursiveSearchInArchiveFile(zipEntryName + "!/" + localZipEntry.getName(),localZipInputStream, searchPath, criteria);
 				}
 			} catch (Exception e) {			
 
