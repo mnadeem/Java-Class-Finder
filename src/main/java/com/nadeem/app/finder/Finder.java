@@ -4,6 +4,7 @@ import java.util.Scanner;
 
 import com.nadeem.app.finder.engine.SearchEngine;
 import com.nadeem.app.finder.modal.SearchCriteria;
+import com.nadeem.app.finder.ui.GuiDisplay;
 import com.nadeem.app.finder.util.DefaultConsoleLogger;
 
 public class Finder {
@@ -81,7 +82,6 @@ public class Finder {
 	}
 
 	private static void goGUI() {
-		System.out.println("**** Not yet Implemented ****");
-		System.out.println("Bye, bye...");
+		new GuiDisplay().show();
 	}
 }
