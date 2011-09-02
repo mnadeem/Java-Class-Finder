@@ -21,4 +21,8 @@ public class SearchThread extends Thread {
 	public void abortSearch() {
 		engine.abortSearch();
 	}
+	
+	public void clearAbortStatus() {
+		engine.clearAbortStatus();
+	}
 }
