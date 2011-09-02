@@ -1,0 +1,11 @@
+A small java utility to help you search files in archive files (jar,war,ear and zip)
+
+Features
+-Easy to use
+-Both command line and GUI versions available
+-Recursively searches(deep search) in Archive file, for example EAR file
+
+Go to http://reachmnadeem.wordpress.com/2011/08/29/java-class-finder/ for more information
+
+execute the following command at the root of the project to create the executable 
+mvn package
