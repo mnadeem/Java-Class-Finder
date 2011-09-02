@@ -2,6 +2,7 @@ package com.nadeem.app.finder.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.SystemColor;
 import java.awt.event.ActionEvent;
@@ -10,6 +11,7 @@ import java.io.File;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -21,7 +23,7 @@ import javax.swing.JToolBar;
 import javax.swing.WindowConstants;
 import javax.swing.border.EtchedBorder;
 
-import com.nadeem.app.finder.engine.SearchEngine;
+import com.nadeem.app.finder.SearchThread;
 import com.nadeem.app.finder.modal.SearchCriteria;
 import com.nadeem.app.finder.util.DefaultFileFilter;
 import com.nadeem.app.finder.util.LogListener;
@@ -32,17 +34,21 @@ public class MainFrame extends JFrame implements LogListener {
 	
 	private JList resultModel 			= new JList(new DefaultListModel());
 	private JFileChooser fileChooser 	= null;
-	private SearchEngine searchEngine;
-	private SearchCriteria searchCriteria;
+	private SearchThread searchThread;
+	private volatile SearchCriteria searchCriteria;
 	
 	private JTextField locationField;
 	private JTextField fileNameField;
+	
+	private JButton abortButton;
+	private JButton searchButton;
+	
+	private JCheckBox deepSearchRequired;
 
 	public MainFrame() {
 		initFrame();
 		initFileChooser();
-		searchEngine = new SearchEngine(this);
-		searchCriteria = new SearchCriteria();
+		searchCriteria 	= new SearchCriteria();		
 		
 		getContentPane().setLayout(new BorderLayout());
 		getContentPane().add(newSearchToolBar(), BorderLayout.NORTH);
@@ -83,10 +89,20 @@ public class MainFrame extends JFrame implements LogListener {
 		JToolBar searchPanel = new JToolBar();
 		fileNameField =newSearchField();
 		searchPanel.add(fileNameField);
+		searchPanel.add(newDeepSearchCheckBox());
+		searchPanel.addSeparator();
 		searchPanel.add(newSearchButton());
 		searchPanel.addSeparator();
 		searchPanel.add(newAbortButton());
 		return searchPanel;
+	}
+	
+	private JCheckBox newDeepSearchCheckBox() {
+		deepSearchRequired = new JCheckBox();
+		deepSearchRequired.setText("Deep Search");
+		deepSearchRequired.setSelected(false);
+		deepSearchRequired.setBounds(206, 6, 97, 22);
+		return deepSearchRequired;
 	}
 	
 	private JToolBar newLocationPanel () {
@@ -100,16 +116,22 @@ public class MainFrame extends JFrame implements LogListener {
 	}
 	
 	private JButton newSearchButton() {
-		JButton searchButton = new JButton();
+		searchButton = new JButton();
 		searchButton.setIcon(Resource.getSearchIcon());
 		searchButton.setToolTipText("Click to Start the search");
 		searchButton.addActionListener(new ActionListener() {
 			
 			public void actionPerformed(ActionEvent e) {
+				abortButton.setEnabled(true);
+				searchButton.setEnabled(false);
 				searchCriteria.clearPath();
 				searchCriteria.setFileName(fileNameField.getText());
 				searchCriteria.addPath(locationField.getText());
-				searchEngine.searchForClass(searchCriteria);
+				searchCriteria.setDeepSearch(deepSearchRequired.isSelected());
+
+				((DefaultListModel)resultModel.getModel()).clear();
+				searchThread 	= new SearchThread(searchCriteria, MainFrame.this);
+				searchThread.start();				
 				
 			}
 		});
@@ -117,14 +139,17 @@ public class MainFrame extends JFrame implements LogListener {
 	}
 
 	private JButton newAbortButton() {
-		JButton abortButton = new JButton();
+		abortButton = new JButton();
 		abortButton.setIcon(Resource.getAbortIcon());
 		abortButton.setToolTipText("Click to abort the search Operation");
+		abortButton.setEnabled(false);
 		
 		abortButton.addActionListener(new ActionListener() {
 			
 			public void actionPerformed(ActionEvent e) {
-				searchEngine.abortSearch();				
+				searchButton.setEnabled(true);
+				abortButton.setEnabled(false);
+				searchThread.abortSearch();				
 			}
 		});
 		
@@ -158,7 +183,8 @@ public class MainFrame extends JFrame implements LogListener {
 	}
 	
 	private JButton chooseLocationButton() {
-		JButton chooseDirectory = new JButton("Choose");
+		JButton chooseDirectory = new JButton("Choose Location");
+		chooseDirectory.setFont(new  Font("sansserif", Font.BOLD, 14));  
 		chooseDirectory.addActionListener(new ActionListener() {
 			
 			public void actionPerformed(ActionEvent e) {
