@@ -25,15 +25,15 @@ public class SplashScreen extends JWindow {
 	public void splash() {
 		setVisible(true);
 		repaint();
-		 Timer cleanup = new Timer(SPLASH_SCREEN_TIME_OUT, new ActionListener() {
+		 Timer timer = new Timer(SPLASH_SCREEN_TIME_OUT, new ActionListener() {
 
 			public void actionPerformed(ActionEvent e) {
 				onSplashScreenTimeOut();
 			}
 
 		});
-	    cleanup.setRepeats(false);
-	    cleanup.start();
+	    timer.setRepeats(false);
+	    timer.start();
 	}
 
 	protected void onSplashScreenTimeOut() {
