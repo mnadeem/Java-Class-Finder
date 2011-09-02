@@ -41,6 +41,7 @@ public class SearchEngine {
 	}
 
 	public void searchForClass(final SearchCriteria criteria) {
+		abortSearch = Boolean.FALSE;
 		for (String path : criteria.getPaths()) {
 			File searchPath = searchPath(path);
 			if (!searchPath.exists()) {

@@ -40,6 +40,10 @@ public class SearchCriteria {
 	public void addPath(String path) {
 		paths.add(path);
 	}
+	
+	public void clearPath() {
+		paths.clear();
+	}
 
 	public String getFileName() {
 		return fileName;
