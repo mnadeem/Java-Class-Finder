@@ -53,6 +53,11 @@ public class SearchEngine {
 				logIfCurrentFileMatched(searchPath, criteria);
 			}
 		}
+		onFinish();
+	}
+
+	protected void onFinish() {
+		
 	}
 
 	protected File searchPath(String path) {

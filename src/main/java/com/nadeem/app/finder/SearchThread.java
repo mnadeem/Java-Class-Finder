@@ -11,7 +11,14 @@ public class SearchThread extends Thread {
 	
 	public SearchThread(SearchCriteria criteria, LogListener logListener) {
 		this.criteria 	= criteria;
-		this.engine 	= new SearchEngine(logListener);
+		this.engine 	= new SearchEngine(logListener) {
+			@Override
+			protected void onFinish() {
+				onSearchFinish();
+			}
+
+			
+		};
 	}
 	
 	@Override
@@ -24,5 +31,9 @@ public class SearchThread extends Thread {
 	
 	public void clearAbortStatus() {
 		engine.clearAbortStatus();
+	}
+	
+	protected void onSearchFinish() {
+		
 	}
 }

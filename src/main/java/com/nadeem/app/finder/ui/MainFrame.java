@@ -130,7 +130,13 @@ public class MainFrame extends JFrame implements LogListener {
 				searchCriteria.setDeepSearch(deepSearchRequired.isSelected());
 
 				((DefaultListModel)resultModel.getModel()).clear();
-				searchThread 	= new SearchThread(searchCriteria, MainFrame.this);
+				searchThread 	= new SearchThread(searchCriteria, MainFrame.this) {
+					@Override
+					protected void onSearchFinish() {
+						abortButton.setEnabled(false);
+						searchButton.setEnabled(true);
+					}
+				};
 				searchThread.start();				
 				
 			}
@@ -149,7 +155,8 @@ public class MainFrame extends JFrame implements LogListener {
 			public void actionPerformed(ActionEvent e) {
 				searchButton.setEnabled(true);
 				abortButton.setEnabled(false);
-				searchThread.abortSearch();				
+				searchThread.abortSearch();	
+				onLog("Done!!!");
 			}
 		});
 		
