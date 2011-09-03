@@ -3,9 +3,9 @@ package com.nadeem.app.finder;
 import java.util.Scanner;
 
 import com.nadeem.app.finder.engine.SearchEngine;
+import com.nadeem.app.finder.listener.impl.DefaultConsoleLogger;
 import com.nadeem.app.finder.modal.SearchCriteria;
 import com.nadeem.app.finder.ui.GuiDisplay;
-import com.nadeem.app.finder.util.DefaultConsoleLogger;
 
 public class Finder {
 

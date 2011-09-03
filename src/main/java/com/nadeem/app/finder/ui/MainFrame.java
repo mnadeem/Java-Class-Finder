@@ -24,11 +24,12 @@ import javax.swing.WindowConstants;
 import javax.swing.border.EtchedBorder;
 
 import com.nadeem.app.finder.SearchThread;
+import com.nadeem.app.finder.listener.LogListener;
+import com.nadeem.app.finder.listener.MatchCountChangeListener;
 import com.nadeem.app.finder.modal.SearchCriteria;
 import com.nadeem.app.finder.util.DefaultFileFilter;
-import com.nadeem.app.finder.util.LogListener;
 
-public class MainFrame extends JFrame implements LogListener {
+public class MainFrame extends JFrame implements LogListener, MatchCountChangeListener {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -44,6 +45,8 @@ public class MainFrame extends JFrame implements LogListener {
 	private JButton searchButton;
 	
 	private JCheckBox deepSearchRequired;
+	
+	private JLabel matchCountLabel;
 
 	public MainFrame() {
 		initFrame();
@@ -137,6 +140,7 @@ public class MainFrame extends JFrame implements LogListener {
 						searchButton.setEnabled(true);
 					}
 				};
+				searchThread.addCountChageListener(MainFrame.this);
 				searchThread.start();				
 				
 			}
@@ -175,9 +179,11 @@ public class MainFrame extends JFrame implements LogListener {
 	
 	private JPanel newStatusPanel () {
 		JPanel statusPanel = new JPanel();
-		statusPanel.setPreferredSize(new Dimension(0, 20));
+		statusPanel.setPreferredSize(new Dimension(0, 25));
 		statusPanel.setLayout(new GridLayout(1, 2, 2, 0));
-		statusPanel.add(new JLabel("Work In Progress"));
+		
+		matchCountLabel = new JLabel("Search Not Started");
+		statusPanel.add(matchCountLabel);
 		
 		return statusPanel;
 	}
@@ -218,5 +224,9 @@ public class MainFrame extends JFrame implements LogListener {
 
 	public void onLog(String message) {
 		((DefaultListModel)resultModel.getModel()).addElement(message);
+	}
+
+	public void onCountChange(int newCount) {
+		matchCountLabel.setText("Match Count = " + newCount);		
 	}
 }

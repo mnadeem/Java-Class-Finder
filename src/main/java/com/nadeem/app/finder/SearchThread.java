@@ -1,8 +1,9 @@
 package com.nadeem.app.finder;
 
 import com.nadeem.app.finder.engine.SearchEngine;
+import com.nadeem.app.finder.listener.LogListener;
+import com.nadeem.app.finder.listener.MatchCountChangeListener;
 import com.nadeem.app.finder.modal.SearchCriteria;
-import com.nadeem.app.finder.util.LogListener;
 
 public class SearchThread extends Thread {
 	
@@ -31,6 +32,10 @@ public class SearchThread extends Thread {
 	
 	public void clearAbortStatus() {
 		engine.clearAbortStatus();
+	}
+	
+	public void addCountChageListener (MatchCountChangeListener countListener) {
+		engine.setCountListener(countListener);
 	}
 	
 	protected void onSearchFinish() {

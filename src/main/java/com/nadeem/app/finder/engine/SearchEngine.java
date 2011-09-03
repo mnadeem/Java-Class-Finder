@@ -15,8 +15,9 @@ import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
+import com.nadeem.app.finder.listener.LogListener;
+import com.nadeem.app.finder.listener.MatchCountChangeListener;
 import com.nadeem.app.finder.modal.SearchCriteria;
-import com.nadeem.app.finder.util.LogListener;
 import com.nadeem.app.finder.util.ResultType;
 import com.nadeem.app.finder.util.SearchAbortedException;
 
@@ -27,6 +28,9 @@ public class SearchEngine {
 
 	private Boolean abortSearch 			= Boolean.FALSE;
 	private LogListener logListener;
+	private MatchCountChangeListener countListener;
+	
+	private int matchCount;
 
 	public SearchEngine(LogListener logListener) {
 		this.logListener = logListener;
@@ -41,6 +45,7 @@ public class SearchEngine {
 	}
 
 	public void searchForClass(final SearchCriteria criteria) {
+		matchCount = 0;
 		for (String path : criteria.getPaths()) {
 			File searchPath = searchPath(path);
 			if (!searchPath.exists()) {
@@ -52,6 +57,9 @@ public class SearchEngine {
 			} else {
 				logIfCurrentFileMatched(searchPath, criteria);
 			}
+		}
+		if (countListener == null) {
+			logListener.onLog("Total Matchs = " + matchCount);
 		}
 		onFinish();
 	}
@@ -82,6 +90,7 @@ public class SearchEngine {
 				throwExceptionIfAborted();
 				if (!zipEntry.isDirectory() && !zipEntry.getName().endsWith(String.valueOf(FILE_SEPERATOR)) && getSimpleZipFileName(zipEntry.getName()).equalsIgnoreCase(criteria.getFileName())) {
 				      this.logListener.onLog(ResultType.ARCHIVE.buildMessage(zipEntry.getName() + " Found in : " +  searchPath.getAbsolutePath()));
+				      updateMatchCountListener();
 				} else if (isCompressedFile(zipEntry.getName())) {
 					zipInputStream = new ZipInputStream(archiveFile.getInputStream(zipEntry));
 					recursiveSearchInArchiveFile(zipEntry.getName(), zipInputStream, searchPath, criteria);
@@ -99,6 +108,14 @@ public class SearchEngine {
 		}
 	}
 
+	private void updateMatchCountListener() {
+		matchCount ++;
+		if (countListener != null) {
+			countListener.onCountChange(matchCount);
+		}
+		
+	}
+
 	private void recursiveSearchInArchiveFile (String zipEntryName, ZipInputStream zipInputStream, File searchPath, SearchCriteria criteria) {
 
 		while (true) {
@@ -112,6 +129,7 @@ public class SearchEngine {
 
 				if (!localZipEntry.isDirectory() && !localZipEntry.getName().endsWith(String.valueOf(FILE_SEPERATOR)) && getSimpleZipFileName(localZipEntry.getName()).equalsIgnoreCase(criteria.getFileName())) {
 				      this.logListener.onLog(ResultType.ARCHIVE.buildMessage(zipEntryName + "!/" + localZipEntry.getName() + " Found in : " +  searchPath.getAbsolutePath()));
+				      updateMatchCountListener();
 				} else if (isCompressedFile(localZipEntry.getName())) {
 
 					localZipInputStream = getZipInputStream(zipInputStream, localZipEntry);
@@ -149,6 +167,7 @@ public class SearchEngine {
 
 				if (!zipEntry.getName().endsWith(String.valueOf(FILE_SEPERATOR)) && getSimpleZipFileName(zipEntry.getName()).equalsIgnoreCase(criteria.getFileName())) {
 				      this.logListener.onLog(ResultType.ARCHIVE.buildMessage(zipEntry.getName() + " Found in : " +  currentFile.getAbsolutePath()));
+				      updateMatchCountListener();
 				}
 
 			}
@@ -194,6 +213,7 @@ public class SearchEngine {
 	private void logIfCurrentFileMatched(File fileSystem, SearchCriteria criteria) {
 		if (getSimpleFileName(fileSystem.getName()).equalsIgnoreCase(criteria.getFileName())) {
 		      this.logListener.onLog(ResultType.DIRECTORY.buildMessage(criteria.getFileName() + " Found in : " +  fileSystem.getAbsolutePath()));
+		      updateMatchCountListener();
 		}
 	}
 
@@ -248,4 +268,8 @@ public class SearchEngine {
 	public void clearAbortStatus() {
 		this.abortSearch = Boolean.FALSE;
 	}
+
+	public void setCountListener(MatchCountChangeListener countListener) {
+		this.countListener = countListener;
+	}	
 }

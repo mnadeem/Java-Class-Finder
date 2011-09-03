@@ -19,8 +19,8 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 
+import com.nadeem.app.finder.listener.LogListener;
 import com.nadeem.app.finder.util.EmptyEnumeration;
-import com.nadeem.app.finder.util.LogListener;
 import com.nadeem.app.finder.util.ResultType;
 
 public class SearchEngineTest {
@@ -56,7 +56,7 @@ public class SearchEngineTest {
 
 		targetBeingTested.searchForClass(paths, SOME_CLASS);
 
-		verify(mockedLogger, times(1)).onLog(anyString());
+		verify(mockedLogger, times(2)).onLog(anyString());
 	}
 	
 	@Test
@@ -66,8 +66,8 @@ public class SearchEngineTest {
 
 		targetBeingTested.searchForClass(SOME_PATH, SOME_CLASS);
 
-		verify(mockedLogger).onLog(argumentCaptor.capture());
-		assertEquals(ResultType.INVALID.buildMessage(SOME_PATH), argumentCaptor.getValue());
+		verify(mockedLogger, times(2)).onLog(argumentCaptor.capture());
+		assertEquals(ResultType.INVALID.buildMessage(SOME_PATH), argumentCaptor.getAllValues().get(0));
 	}
 
 	@Test
@@ -81,8 +81,8 @@ public class SearchEngineTest {
 		targetBeingTested.searchForClass(SOME_PATH, SOME_CLASS);
 
 		ArgumentCaptor<String> argumentCaptor = ArgumentCaptor.forClass(String.class);
-		verify(mockedLogger).onLog(argumentCaptor.capture());
-		assertEquals(ResultType.DIRECTORY.buildMessage(SOME_CLASS + " Found in : " +new File(SOME_CLASS).getAbsolutePath()), argumentCaptor.getValue());
+		verify(mockedLogger, times(2)).onLog(argumentCaptor.capture());
+		assertEquals(ResultType.DIRECTORY.buildMessage(SOME_CLASS + " Found in : " +new File(SOME_CLASS).getAbsolutePath()), argumentCaptor.getAllValues().get(0));
 	}
 	
 	@Test
@@ -96,8 +96,8 @@ public class SearchEngineTest {
 		targetBeingTested.searchForClass(SOME_PATH, SOME_CLASS);
 		
 		ArgumentCaptor<String> argumentCaptor = ArgumentCaptor.forClass(String.class);
-		verify(mockedLogger).onLog(argumentCaptor.capture());
-		assertEquals(ResultType.DIRECTORY.buildMessage(SOME_CLASS + " Found in : " + new File(SOME_CLASS).getAbsolutePath()), argumentCaptor.getValue());
+		verify(mockedLogger, times(2)).onLog(argumentCaptor.capture());
+		assertEquals(ResultType.DIRECTORY.buildMessage(SOME_CLASS + " Found in : " + new File(SOME_CLASS).getAbsolutePath()), argumentCaptor.getAllValues().get(0));
 
 	}
 
@@ -114,8 +114,8 @@ public class SearchEngineTest {
 		targetBeingTested.searchForClass(SOME_PATH, SOME_CLASS);
 
 		ArgumentCaptor<String> argumentCaptor = ArgumentCaptor.forClass(String.class);
-		verify(mockedLogger).onLog(argumentCaptor.capture());
-		assertEquals(ResultType.ABORTED.toString(), argumentCaptor.getValue());
+		verify(mockedLogger, times(2)).onLog(argumentCaptor.capture());
+		assertEquals(ResultType.ABORTED.toString(), argumentCaptor.getAllValues().get(0));
 	}
 	
 	@Test

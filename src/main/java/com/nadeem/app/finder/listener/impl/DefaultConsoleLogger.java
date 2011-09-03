@@ -1,4 +1,6 @@
-package com.nadeem.app.finder.util;
+package com.nadeem.app.finder.listener.impl;
+
+import com.nadeem.app.finder.listener.LogListener;
 
 public class DefaultConsoleLogger implements LogListener {
 
